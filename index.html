@@ -6,6 +6,57 @@
 <script src="./vendor/react.js"></script>
 <script src="./vendor/react-dom.js"></script>
 <script src="./support.js"></script>
+<style>
+html{scroll-behavior:smooth}
+#sp{position:fixed;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,#B98E3B,#F2D68E);transform:scaleX(0);transform-origin:0 50%;z-index:100;pointer-events:none}
+
+/* scroll reveal: uses `translate` so hover transforms keep working */
+html .rv{opacity:0;translate:0 40px;transition:opacity .8s cubic-bezier(.2,.7,.2,1) var(--d,0s),translate .8s cubic-bezier(.2,.7,.2,1) var(--d,0s),transform .25s,box-shadow .25s,border-color .25s}
+html .rv.in{opacity:1;translate:0 0}
+.k:before{transform:scaleX(0);transform-origin:0 50%;transition:transform .8s .2s cubic-bezier(.2,.7,.2,1)}
+.k.in:before{transform:scaleX(1)}
+
+@keyframes hi{from{opacity:0;translate:0 34px;scale:.97}to{opacity:1;translate:0 0;scale:1}}
+@keyframes flt{0%,100%{translate:0 0}50%{translate:0 -12px}}
+@keyframes drift{0%,100%{translate:0 0}50%{translate:40px -30px}}
+@keyframes shine{from{background-position:0 0}to{background-position:100% 0}}
+@keyframes flow{to{stroke-dashoffset:-64}}
+@keyframes spin{to{rotate:360deg}}
+@keyframes grow{from{scale:1 0}to{scale:1 1}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(226,193,116,.55),0 10px 24px rgba(0,0,0,.35)}70%,100%{box-shadow:0 0 0 18px rgba(226,193,116,0),0 10px 24px rgba(0,0,0,.35)}}
+@keyframes sweep{from{left:-60%}to{left:130%}}
+@keyframes opn{from{opacity:0;translate:0 -8px}to{opacity:1;translate:0 0}}
+.hi{animation:hi .9s cubic-bezier(.2,.7,.2,1) var(--d,0s) both}
+.fl.hi{animation:hi .9s cubic-bezier(.2,.7,.2,1) var(--d,0s) both,flt 6s ease-in-out calc(var(--d,0s) + .9s) infinite}
+#dc-root h1 span{background-image:linear-gradient(110deg,#B98E3B 0%,#F2D68E 30%,#fff3c9 50%,#F2D68E 70%,#B98E3B 100%)!important;background-size:200% 100%!important;animation:shine 4s ease-in-out infinite alternate}
+.blob{animation:drift 14s ease-in-out infinite}
+.blob:nth-of-type(even){animation-duration:18s;animation-direction:reverse}
+.flow{stroke-dasharray:6 10;animation:flow 3s linear infinite}
+.sv-grow{transform-box:fill-box;transform-origin:50% 100%;animation:grow 1s cubic-bezier(.2,.7,.2,1) var(--d,0s) both}
+.sv-spin{transform-box:fill-box;transform-origin:50% 50%;animation:spin 14s linear infinite}
+.sv-draw{animation:draw 1.8s ease-out .8s forwards}
+.pm{animation:ring 2.4s ease-out infinite}
+
+.nv a{position:relative}
+.nv a:after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:#B98E3B;transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
+.nv a:hover:after{transform:scaleX(1)}
+.btn.gold{position:relative;overflow:hidden}
+.btn.gold:after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);pointer-events:none}
+.btn.gold:hover:after{animation:sweep .8s ease}
+.c:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(226,193,116,.22),transparent 70%)}
+.c:hover:before{opacity:1}
+.ic{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.c:hover .ic{transform:rotate(-8deg) scale(1.12)}
+details[open] p{animation:opn .4s ease both}
+
+@media (prefers-reduced-motion:reduce){
+*,*:before,*:after{animation:none!important;transition:none!important}
+html .rv{opacity:1;translate:none}
+.k:before{transform:none}
+html{scroll-behavior:auto}
+}
+</style>
 </head>
 <body>
 <x-dc>
@@ -155,6 +206,65 @@ renderVals() {
 return {};
 }
 }
+</script>
+<script>
+(function(){
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var root,io,bar,pending=false;
+function add(el,cls,d){if(!el||el.dataset.a)return;el.dataset.a='1';el.classList.add(cls);if(d!=null)el.style.setProperty('--d',d+'s')}
+function scan(){
+root=document.getElementById('dc-root');
+if(!root||!root.querySelector('h1'))return;
+if(!io){
+io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+bar=document.createElement('div');bar.id='sp';document.body.appendChild(bar);
+}
+var hero=root.querySelector('section.w');
+if(hero){
+var left=hero.children[0],right=hero.children[1];
+if(left)Array.prototype.forEach.call(left.children,function(el,i){add(el,'hi',.1+i*.12)});
+if(right){
+Array.prototype.forEach.call(right.children,function(el,i){add(el,'hi',.35+i*.18)});
+var p=right.querySelector('path[stroke="#B98E3B"]');
+if(p&&!p.dataset.a){p.dataset.a='1';var L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.classList.add('sv-draw')}
+right.querySelectorAll('g[stroke-width="1.5"], g[fill="url(#wn)"]').forEach(function(g){Array.prototype.forEach.call(g.children,function(r,i){add(r,'sv-grow',.7+i*.15)})});
+var cg=right.querySelector('g[stroke-width="2"]');
+if(cg)add(cg,'sv-spin');
+}
+}
+root.querySelectorAll('g[stroke="#E2C174"][opacity=".35"]').forEach(function(g){add(g,'flow')});
+root.querySelectorAll('.k,.h2,.lead').forEach(function(el){add(el,'rv',0);io.observe(el)});
+root.querySelectorAll('.g').forEach(function(wrap){
+Array.prototype.forEach.call(wrap.children,function(el,i){
+if(el.dataset.a)return;
+add(el,'rv',Math.min(i%6,5)*.09);io.observe(el)})});
+root.querySelectorAll('.sec .w > div:not(.g), details, #devis .c').forEach(function(el,i){if(!el.dataset.a){add(el,'rv',(i%4)*.08);io.observe(el)}});
+}
+function sched(){if(pending)return;pending=true;requestAnimationFrame(function(){pending=false;scan()})}
+new MutationObserver(sched).observe(document.documentElement,{childList:true,subtree:true});
+sched();
+
+var ticking=false;
+function onScroll(){
+if(ticking)return;ticking=true;
+requestAnimationFrame(function(){
+ticking=false;
+var h=document.documentElement.scrollHeight-innerHeight;
+if(bar)bar.style.transform='scaleX('+(h>0?scrollY/h:0)+')';
+if(root)root.querySelectorAll('.blob').forEach(function(b){
+var s=b.parentNode.getBoundingClientRect();
+b.style.transform='translateY('+((s.top+s.height/2-innerHeight/2)*-.1).toFixed(1)+'px)'});
+})}
+addEventListener('scroll',onScroll,{passive:true});
+addEventListener('resize',onScroll);
+addEventListener('pointermove',function(e){
+var c=e.target.closest&&e.target.closest('.c');
+if(!c)return;
+var r=c.getBoundingClientRect();
+c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+c.style.setProperty('--my',(e.clientY-r.top)+'px')
+},{passive:true});
+})();
 </script>
 </body>
 </html>
